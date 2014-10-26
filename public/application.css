@@ -1,0 +1,38 @@
+.game-buttons form {
+  display: inline-block;
+}
+
+.hand-info {
+  margin-top: -20px;
+}
+
+.card {
+  display: inline-block;
+  margin: 2px; 
+  border: 2px solid black;
+  height: 150px;
+  width: 100px;
+}
+
+.card img {
+  height: 100%;
+  width: auto;
+}
+
+.btn {
+  margin: 10px;
+}
+
+#dealer-hit {
+  margin-top: 10px;
+  margin-bottom: -30px;
+}
+
+#dealer-hit p {
+  display: inline-block;
+  color: #0044cc;
+}
+
+#dealer-hit form {
+  display: inline-block;
+}
