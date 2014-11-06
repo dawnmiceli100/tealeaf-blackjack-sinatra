@@ -36,21 +36,21 @@ helpers do
   end 
 
   def declare_win(msg)
-    @success = "Congratulations, #{session[:player_name]}! #{msg}"
+    @winner = "Congratulations, #{session[:player_name]}! #{msg}"
     @game_over = true
     @show_game_buttons = false
     session[:player_chips] += session[:bet_amount]
   end
 
   def declare_loss(msg)
-    @error = "Sorry, #{session[:player_name]}. #{msg}"
+    @loser = "Sorry, #{session[:player_name]}. #{msg}"
     @game_over = true
     @show_game_buttons = false
     session[:player_chips] -= session[:bet_amount]
   end
 
   def declare_tie(msg)
-    @success = "The game has ended in a tie at #{msg}."
+    @winner = "The game has ended in a tie at #{msg}."
     @game_over = true
     @show_game_buttons = false
   end 
@@ -132,7 +132,7 @@ post '/player/hit' do
   elsif session[:player_total] == BLACKJACK_AMT
     declare_win("You have hit blackjack!")
   end    
-  erb :game
+  erb :game, layout: false
 end  
 
 post '/player/stay' do
@@ -162,7 +162,7 @@ get '/dealer/turn' do
     @show_dealer_card_button = true  
   end 
 
-  erb :game
+  erb :game, layout: false
 end    
 
 post '/dealer/hit' do
@@ -186,7 +186,7 @@ post '/dealer/hit' do
     @show_dealer_card_button = true  
   end  
 
-  erb :game
+  erb :game, layout: false
 end  
 
 get '/goodbye' do
