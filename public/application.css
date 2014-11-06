@@ -1,3 +1,20 @@
+
+.hand-well {
+  background-color: #008800;
+  border: none;
+  width: 600px;
+}
+
+#image-frame {
+  width: 400px;
+  background-color: black;
+}
+
+#image-frame img {
+  display: block;
+  margin: auto;
+}
+
 .game-buttons form {
   display: inline-block;
 }
@@ -25,7 +42,6 @@
 
 #dealer-hit {
   margin-top: 10px;
-  margin-bottom: -30px;
 }
 
 #dealer-hit p {

@@ -1,0 +1,7 @@
+<h3>You have $<%= session[:player_chips] %> to play with.</h3>
+<h4>How much would you like to bet?</h4>
+<form action = '/bet' method='post'>
+  <input type='text' name='bet_amount'/>
+  </br>
+  <input type='submit' class='btn'/>
+</form>   

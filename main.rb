@@ -8,6 +8,7 @@ use Rack::Session::Cookie, :key => 'rack.session',
 
 BLACKJACK_AMT = 21
 DEALER_STAY_AMT = 17
+STARTING_CHIPS_AMT = 500
 
 helpers do
   def calculate_total(cards)
@@ -38,16 +39,18 @@ helpers do
     @success = "Congratulations, #{session[:player_name]}! #{msg}"
     @game_over = true
     @show_game_buttons = false
+    session[:player_chips] += session[:bet_amount]
   end
 
   def declare_loss(msg)
     @error = "Sorry, #{session[:player_name]}. #{msg}"
     @game_over = true
     @show_game_buttons = false
+    session[:player_chips] -= session[:bet_amount]
   end
 
   def declare_tie(msg)
-    @success = "The game has ended in a tie at #{msg}"
+    @success = "The game has ended in a tie at #{msg}."
     @game_over = true
     @show_game_buttons = false
   end 
@@ -67,6 +70,7 @@ get '/' do
 end
 
 get '/new_player' do
+  session[:player_chips] = STARTING_CHIPS_AMT
   erb :set_player_name
 end  
   
@@ -75,10 +79,28 @@ post '/set_player_name' do
     @error = "You must enter your name to start the game."
     halt erb(:set_player_name)
   end
-    
+  
   session[:player_name] = params[:player_name]
-  redirect '/game'
+  redirect '/bet'
 end
+
+get '/bet' do
+  session[:bet_amount] = nil
+  erb :bet
+end
+
+post '/bet' do
+  if params[:bet_amount].nil? || params[:bet_amount].to_i == 0
+    @error = "You must enter a bet amount to start this round."
+    halt erb(:bet)
+
+  elsif params[:bet_amount].to_i > session[:player_chips]
+    @error = "You cannot bet more than you have."
+    halt erb(:bet)      
+  end
+  session[:bet_amount] = params[:bet_amount].to_i
+  redirect '/game' 
+end     
 
 get '/game' do
   SUITS = ["hearts", "diamonds", "clubs", "spades"]
@@ -88,7 +110,7 @@ get '/game' do
   session[:dealer_cards] = []
   session[:player_total] = 0
   session[:dealer_total] = 0
-
+  
   #deal cards
   2.times do
     session[:player_cards] << session[:deck].pop
@@ -98,7 +120,7 @@ get '/game' do
   session[:player_total] = calculate_total(session[:player_cards])
   session[:dealer_total] = calculate_total(session[:dealer_cards])
   
-  @info = "A new game has been dealt #{session[:player_name]}!"   
+  #@info = "A new game has been dealt #{session[:player_name]}!"   
   erb :game
 end
 
@@ -125,14 +147,16 @@ get '/dealer/turn' do
   @dealer_turn = true
   session[:dealer_total] = calculate_total(session[:dealer_cards])
   if session[:dealer_total] >= DEALER_STAY_AMT
-    if session[:dealer_total] == BLACKJACK_AMT
+    if (session[:dealer_total] == BLACKJACK_AMT) && (session[:player_total] == BLACKJACK_AMT)
+      declare_tie("#{BLACKJACK_AMT}") 
+    elsif (session[:dealer_total] == BLACKJACK_AMT) 
       declare_loss("Dealer has hit blackjack!")
     elsif (session[:dealer_total] > session[:player_total]) 
       declare_loss("Dealer total of #{session[:dealer_total]} is higher than your total of #{session[:player_total]}.")
     elsif (session[:dealer_total] < session[:player_total]) 
       declare_win("Dealer must stay on #{DEALER_STAY_AMT} or higher. You have won with #{session[:player_total]}.")
     elsif (session[:dealer_total] == session[:player_total])
-      declare_tie("#{session[:player_total]}.") 
+      declare_tie("#{session[:player_total]}") 
     end       
   else
     @show_dealer_card_button = true  
@@ -148,7 +172,9 @@ post '/dealer/hit' do
   session[:dealer_cards] << session[:deck].pop
   session[:dealer_total] = calculate_total(session[:dealer_cards])
 
-  if session[:dealer_total] == BLACKJACK_AMT
+  if (session[:dealer_total] == BLACKJACK_AMT) && (session[:player_total] == BLACKJACK_AMT)
+    declare_tie("#{BLACKJACK_AMT}") 
+  elsif (session[:dealer_total] == BLACKJACK_AMT) 
     declare_loss("Dealer has hit blackjack!")
   elsif session[:dealer_total] > BLACKJACK_AMT
     declare_win("Dealer has busted!")
