@@ -120,7 +120,10 @@ get '/game' do
   session[:player_total] = calculate_total(session[:player_cards])
   session[:dealer_total] = calculate_total(session[:dealer_cards])
   
-  #@info = "A new game has been dealt #{session[:player_name]}!"   
+  #@info = "A new game has been dealt #{session[:player_name]}!" 
+  if session[:player_total] == BLACKJACK_AMT
+    declare_win("You have hit blackjack!")
+  end   
   erb :game
 end
 
